@@ -13,5 +13,11 @@ public interface VillageRepository extends JpaRepository<Village, Long> {
     Optional<Village> findByVillageCode(String villageCode);
 
     List<Village> findByDistrictId(Long districtId);
-
+    List<Village> findByActiveTrue();
+    List<Village> findByDistrictIdAndActiveTrue(Long districtId);
+    boolean existsByVillageCodeAndIdNot(String villageCode, Long id);
+    boolean existsByVillageNameAndDistrictIdAndIdNot(
+            String villageName,
+            Long districtId,
+            Long id);
 }

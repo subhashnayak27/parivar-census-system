@@ -8,11 +8,13 @@ import com.parivar.census.district.service.DistrictService;
 import com.parivar.census.exception.DuplicateResourceException;
 import com.parivar.census.exception.ResourceNotFoundException;
 import com.parivar.census.state.entity.State.State;
-import com.parivar.census.state.repository.StateRepository.StateRepository;
+import com.parivar.census.state.repository.StateRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +24,128 @@ public class DistrictServiceImpl implements DistrictService {
     private final DistrictRepository districtRepository;
     private final StateRepository stateRepository;
 
+    @Override
+    public DistrictResponse getDistrictById(Long id) {
+
+        log.info("Fetching district with id {}", id);
+
+        District district = districtRepository.findById(id)
+                .orElseThrow(() -> {
+
+                    log.warn("District not found with id {}", id);
+
+                    return new ResourceNotFoundException(
+                            "District not found with id : " + id);
+                });
+
+        if (!district.getActive()) {
+            throw new ResourceNotFoundException(
+                    "District not found with id : " + id);
+        }
+
+        return mapToResponse(district);
+    }
+
+    @Override
+    public List<DistrictResponse> getAllDistricts() {
+
+        log.info("Fetching all active districts");
+
+        List<District> districts =
+                districtRepository.findByActiveTrue();
+
+        return districts.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
+    public DistrictResponse updateDistrict(Long id,
+                                           DistrictRequest request) {
+
+        log.info("Updating district {}", id);
+
+        District district = districtRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "District not found with id : " + id));
+
+        // Duplicate District Code
+        if (districtRepository.existsByDistrictCodeAndIdNot(
+                request.getDistrictCode(), id)) {
+
+            throw new DuplicateResourceException(
+                    "District code already exists : "
+                            + request.getDistrictCode());
+        }
+
+        // Duplicate District Name in State
+        if (districtRepository.existsByDistrictNameAndStateIdAndIdNot(
+                request.getDistrictName(),
+                request.getStateId(),
+                id)) {
+
+            throw new DuplicateResourceException(
+                    "District already exists in this state.");
+        }
+
+        // Update State if changed
+        if (!district.getState().getId().equals(request.getStateId())) {
+
+            State state = stateRepository.findById(request.getStateId())
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "State not found"));
+            district.setState(state);
+        }
+
+        district.setDistrictCode(request.getDistrictCode());
+        district.setDistrictName(request.getDistrictName());
+
+        District updatedDistrict = districtRepository.save(district);
+
+        log.info("District updated successfully {}", updatedDistrict.getId());
+
+        return mapToResponse(updatedDistrict);
+    }
+
+    @Override
+    public void deleteDistrict(Long id) {
+
+        log.info("Deleting district {}", id);
+
+        District district = districtRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "District not found with id : " + id));
+
+        district.setActive(false);
+
+        districtRepository.save(district);
+
+        log.info("District soft deleted successfully {}", id);
+    }
+
+    @Override
+    public List<DistrictResponse> getDistrictsByState(Long stateId) {
+
+        return districtRepository.findByStateIdAndActiveTrue(stateId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private DistrictResponse mapToResponse(District district) {
+
+        return DistrictResponse.builder()
+                .id(district.getId())
+                .districtCode(district.getDistrictCode())
+                .districtName(district.getDistrictName())
+                .stateId(district.getState().getId())
+                .stateName(district.getState().getStateName())
+                .active(district.getActive())
+                .build();
+    }
     @Override
     public DistrictResponse createDistrict(DistrictRequest request) {
         log.info("Received request to create district with code: {}",

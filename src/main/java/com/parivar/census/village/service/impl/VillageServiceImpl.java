@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -55,6 +57,122 @@ public class VillageServiceImpl implements VillageService {
 
         // Convert Entity → Response
         return mapToResponse(savedVillage);
+    }
+
+    @Override
+    public VillageResponse getVillageById(Long id) {
+
+        log.info("Fetching village with id {}", id);
+
+        Village village = villageRepository.findById(id)
+                .orElseThrow(() -> {
+
+                    log.warn("Village not found with id {}", id);
+
+                    return new ResourceNotFoundException(
+                            "Village not found with id : " + id);
+                });
+
+        if (!village.getActive()) {
+            throw new ResourceNotFoundException(
+                    "Village not found with id : " + id);
+        }
+
+        return mapToResponse(village);
+    }
+
+    @Override
+    public List<VillageResponse> getAllVillages() {
+
+        log.info("Fetching all active villages");
+
+        List<Village> villages =
+                villageRepository.findByActiveTrue();
+
+        return villages.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
+    public VillageResponse updateVillage(Long id,
+                                         VillageRequest request) {
+
+        log.info("Updating village with id {}", id);
+
+        Village village = villageRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Village not found with id : " + id));
+
+        // Duplicate Village Code
+        if (villageRepository.existsByVillageCodeAndIdNot(
+                request.getVillageCode(), id)) {
+
+            throw new DuplicateResourceException(
+                    "Village code already exists : "
+                            + request.getVillageCode());
+        }
+
+        // Duplicate Village Name within District
+        if (villageRepository.existsByVillageNameAndDistrictIdAndIdNot(
+                request.getVillageName(),
+                request.getDistrictId(),
+                id)) {
+
+            throw new DuplicateResourceException(
+                    "Village already exists in this district.");
+        }
+
+        // Update District if changed
+        if (!village.getDistrict().getId().equals(request.getDistrictId())) {
+
+            District district = districtRepository.findById(
+                            request.getDistrictId())
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "District not found"));
+            village.setDistrict(district);
+        }
+
+        village.setVillageCode(request.getVillageCode());
+        village.setVillageName(request.getVillageName());
+        village.setPostalCode(request.getPostalCode());
+
+        Village updatedVillage = villageRepository.save(village);
+
+        log.info("Village updated successfully {}", updatedVillage.getId());
+
+        return mapToResponse(updatedVillage);
+    }
+
+    @Override
+    public void deleteVillage(Long id) {
+
+        log.info("Deleting village {}", id);
+
+        Village village = villageRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Village not found with id : " + id));
+
+        village.setActive(false);
+
+        villageRepository.save(village);
+
+        log.info("Village soft deleted successfully {}", id);
+    }
+
+    @Override
+    public List<VillageResponse> getVillagesByDistrict(Long districtId) {
+
+        log.info("Fetching villages for district {}", districtId);
+
+        List<Village> villages =
+                villageRepository.findByDistrictIdAndActiveTrue(districtId);
+
+        return villages.stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     private Village mapToEntity(VillageRequest request, District district) {

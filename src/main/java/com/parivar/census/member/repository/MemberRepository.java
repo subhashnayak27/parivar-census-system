@@ -7,18 +7,18 @@ import java.util.List;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    // Duplicate validation
     boolean existsByMemberCode(String memberCode);
 
     boolean existsByAadhaarNo(String aadhaarNo);
 
-    // Family wise members
+    boolean existsByMemberCodeAndIdNot(String memberCode, Long id);
+
+    boolean existsByAadhaarNoAndIdNot(String aadhaarNo, Long id);
+
     List<Member> findByFamilyId(Long familyId);
 
-    // Living members
     List<Member> findByAliveTrue();
 
-    // Active members
     List<Member> findByActiveTrue();
 
 }

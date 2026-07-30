@@ -22,5 +22,5 @@ public class State extends BaseEntity {
 
     @Column(name = "state_name", nullable = false, length = 100)
     private String stateName;
-
+    private Boolean active;
 }
