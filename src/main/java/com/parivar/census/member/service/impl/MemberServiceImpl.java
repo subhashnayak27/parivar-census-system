@@ -1,5 +1,6 @@
 package com.parivar.census.member.service.impl;
 
+import com.parivar.census.district.entity.district.District;
 import com.parivar.census.exception.DuplicateResourceException;
 import com.parivar.census.exception.ResourceNotFoundException;
 import com.parivar.census.family.entity.Family;
@@ -9,6 +10,8 @@ import com.parivar.census.member.dto.response.MemberResponse;
 import com.parivar.census.member.entity.Member;
 import com.parivar.census.member.repository.MemberRepository;
 import com.parivar.census.member.service.MemberService;
+import com.parivar.census.state.entity.State.State;
+import com.parivar.census.village.entity.village.Village;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -176,6 +179,10 @@ public class MemberServiceImpl implements MemberService {
      */
     private MemberResponse mapToResponse(Member member) {
 
+        Family family = member.getFamily();
+        Village village = family.getVillage();
+        District district = village.getDistrict();
+        State state = district.getState();
         return MemberResponse.builder()
                 .id(member.getId())
                 .memberCode(member.getMemberCode())
@@ -191,9 +198,15 @@ public class MemberServiceImpl implements MemberService {
                 .aadhaarNo(member.getAadhaarNo())
                 .occupation(member.getOccupation())
                 .education(member.getEducation())
-                .familyId(member.getFamily().getId())
-                .familyCode(member.getFamily().getFamilyCode())
-                .familyHeadName(member.getFamily().getFamilyHeadName())
+                .familyId(family.getId())
+                .familyCode(family.getFamilyCode())
+                .familyHeadName(family.getFamilyHeadName())
+                .villageId(village.getId())
+                .villageName(village.getVillageName())
+                .districtId(district.getId())
+                .districtName(district.getDistrictName())
+                .stateId(state.getId())
+                .stateName(state.getStateName())
                 .active(member.getActive())
                 .build();
     }

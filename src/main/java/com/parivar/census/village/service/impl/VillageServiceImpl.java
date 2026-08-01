@@ -190,8 +190,13 @@ public class VillageServiceImpl implements VillageService {
                 .villageCode(village.getVillageCode())
                 .villageName(village.getVillageName())
                 .postalCode(village.getPostalCode())
+
                 .districtId(village.getDistrict().getId())
                 .districtName(village.getDistrict().getDistrictName())
+
+                .stateId(village.getDistrict().getState().getId())
+                .stateName(village.getDistrict().getState().getStateName())
+
                 .active(village.getActive())
                 .build();
     }

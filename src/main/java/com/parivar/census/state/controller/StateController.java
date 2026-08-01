@@ -1,8 +1,6 @@
 package com.parivar.census.state.controller;
 
 import com.parivar.census.common.ApiResponse;
-import com.parivar.census.district.dto.request.DistrictRequest;
-import com.parivar.census.district.dto.response.DistrictResponse;
 import com.parivar.census.state.dto.request.StateRequest;
 import com.parivar.census.state.dto.response.StateResponse;
 import com.parivar.census.state.service.StateService;
@@ -11,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/states")
@@ -36,7 +36,19 @@ public class StateController {
                 .data(response)
                 .build();
     }
+    @GetMapping
+    public ApiResponse<List<StateResponse>> getAllStates() {
 
+        log.info("Received request to fetch all states");
+
+        List<StateResponse> response = stateService.getAllStates();
+
+        return ApiResponse.<List<StateResponse>>builder()
+                .success(true)
+                .message("States fetched successfully")
+                .data(response)
+                .build();
+    }
     @GetMapping("/{id}")
     public ApiResponse<StateResponse> getStateById(
             @PathVariable Long id) {

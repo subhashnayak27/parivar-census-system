@@ -1,5 +1,6 @@
 package com.parivar.census.state.service.impl;
 
+import com.parivar.census.common.service.CodeGeneratorService;
 import com.parivar.census.exception.ResourceNotFoundException;
 import com.parivar.census.state.dto.request.StateRequest;
 import com.parivar.census.state.dto.response.StateResponse;
@@ -18,7 +19,7 @@ import java.util.List;
 public class StateServiceImpl implements StateService {
 
     private final StateRepository repository;
-
+    private final CodeGeneratorService codeGeneratorService;
     @Override
     public StateResponse createState(StateRequest request) {
 
@@ -102,7 +103,9 @@ public class StateServiceImpl implements StateService {
                     "State name already exists : " + request.getStateName());
         }
 
-        state.setStateCode(request.getStateCode());
+        state.setStateCode(
+                codeGeneratorService.generateStateCode()
+        );
         state.setStateName(request.getStateName());
 
         State updated = repository.save(state);

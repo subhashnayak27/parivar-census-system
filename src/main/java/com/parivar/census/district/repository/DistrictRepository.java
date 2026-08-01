@@ -11,8 +11,6 @@ public interface DistrictRepository extends JpaRepository<District, Long> {
     List<District> findByActiveTrue();
     List<District> findByStateIdAndActiveTrue(Long stateId);
     boolean existsByDistrictCodeAndIdNot(String districtCode, Long id);
-    boolean existsByDistrictNameAndStateIdAndIdNot(
-            String districtName,
-            Long stateId,
-            Long id);
+    boolean existsByDistrictNameAndStateIdAndIdNot( String districtName, Long stateId, Long id);
+
 }

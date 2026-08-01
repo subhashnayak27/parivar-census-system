@@ -53,8 +53,8 @@ public class MemberRequest {
     private String mobileNo;
 
     @Pattern(
-            regexp = "^[0-9]{12}$",
-            message = "Aadhaar number must be 12 digits"
+            regexp = "^$|^[0-9]{12}$",
+            message = "Aadhaar number must be exactly 12 digits"
     )
     private String aadhaarNo;
 

@@ -59,6 +59,7 @@ public class DistrictController {
                 .data(response)
                 .build();
     }
+
     @PutMapping("/{id}")
     public ApiResponse<DistrictResponse> updateDistrict(
             @PathVariable Long id,

@@ -1,5 +1,6 @@
 package com.parivar.census.family.service.impl;
 
+import com.parivar.census.district.entity.district.District;
 import com.parivar.census.exception.DuplicateResourceException;
 import com.parivar.census.exception.ResourceNotFoundException;
 import com.parivar.census.family.dto.request.FamilyRequest;
@@ -7,6 +8,7 @@ import com.parivar.census.family.dto.response.FamilyResponse;
 import com.parivar.census.family.entity.Family;
 import com.parivar.census.family.repository.FamilyRepository;
 import com.parivar.census.family.service.FamilyService;
+import com.parivar.census.state.entity.State.State;
 import com.parivar.census.village.entity.village.Village;
 import com.parivar.census.village.repository.VillageRepository;
 import lombok.RequiredArgsConstructor;
@@ -174,6 +176,12 @@ public class FamilyServiceImpl implements FamilyService {
 
     private FamilyResponse mapToResponse(Family family) {
 
+        Village village = family.getVillage();
+
+        District district = village.getDistrict();
+
+        State state = district.getState();
+
         return FamilyResponse.builder()
                 .id(family.getId())
                 .familyCode(family.getFamilyCode())
@@ -181,8 +189,16 @@ public class FamilyServiceImpl implements FamilyService {
                 .address(family.getAddress())
                 .mobileNo(family.getMobileNo())
                 .rationCardNo(family.getRationCardNo())
-                .villageId(family.getVillage().getId())
-                .villageName(family.getVillage().getVillageName())
+
+                .villageId(village.getId())
+                .villageName(village.getVillageName())
+
+                .districtId(district.getId())
+                .districtName(district.getDistrictName())
+
+                .stateId(state.getId())
+                .stateName(state.getStateName())
+
                 .active(family.getActive())
                 .build();
     }

@@ -13,4 +13,5 @@ public interface DistrictService {
     DistrictResponse updateDistrict(Long id, DistrictRequest request);
     void deleteDistrict(Long id);
     List<DistrictResponse> getDistrictsByState(Long stateId);
+
 }
