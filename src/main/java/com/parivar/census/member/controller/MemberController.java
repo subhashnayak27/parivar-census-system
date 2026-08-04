@@ -24,9 +24,6 @@ public class MemberController {
     public ApiResponse<MemberResponse> createMember(
             @Valid @RequestBody MemberRequest request) {
 
-        log.info("Received request to create member with code: {}",
-                request.getMemberCode());
-
         MemberResponse response = memberService.createMember(request);
 
         return ApiResponse.<MemberResponse>builder()

@@ -1,20 +1,16 @@
-package com.parivar.census.member.dto.response;
+package com.parivar.census.member.dto.request;
 
 import com.parivar.census.member.enums.Gender;
 import com.parivar.census.member.enums.MaritalStatus;
 import com.parivar.census.member.enums.RelationshipType;
-import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-@Builder
-public class MemberResponse {
+public class MemberUploadRequest {
 
-    private Long id;
-
-    private String memberCode;
+    private String familyCode;
 
     private String firstName;
 
@@ -40,22 +36,9 @@ public class MemberResponse {
 
     private String education;
 
-    private Long familyId;
-    private String familyCode;
-    private String familyHeadName;
     private String gotra;
 
     private String pata;
 
     private String kuldevi;
-    private Long villageId;
-    private String villageName;
-
-    private Long districtId;
-    private String districtName;
-
-    private Long stateId;
-    private String stateName;
-
-    private Boolean active;
 }

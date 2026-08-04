@@ -1,7 +1,6 @@
 package com.parivar.census.family.service.impl;
 
 import com.parivar.census.district.entity.district.District;
-import com.parivar.census.exception.DuplicateResourceException;
 import com.parivar.census.exception.ResourceNotFoundException;
 import com.parivar.census.family.dto.request.FamilyRequest;
 import com.parivar.census.family.dto.response.FamilyResponse;
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,82 +27,84 @@ public class FamilyServiceImpl implements FamilyService {
     @Override
     public FamilyResponse createFamily(FamilyRequest request) {
 
-        log.info("Creating Family. Code: {}, VillageId: {}",
-                request.getFamilyCode(),
-                request.getVillageId());
+        log.info("Creating Family. VillageId: {}", request.getVillageId());
 
-        // Check duplicate Family Code
-        if (familyRepository.existsByFamilyCode(request.getFamilyCode())) {
-            log.warn("Family with code {} already exists",
-                    request.getFamilyCode());
-
-            throw new DuplicateResourceException(
-                    "Family code already exists : " + request.getFamilyCode());
-        }
-
-        // Find Village
         Village village = villageRepository.findById(request.getVillageId())
                 .orElseThrow(() -> {
-                    log.warn("Village not found with id {}",
-                            request.getVillageId());
+                    log.warn("Village not found with id {}", request.getVillageId());
 
                     return new ResourceNotFoundException(
                             "Village not found with id : " + request.getVillageId());
                 });
 
-        // Convert Request DTO to Entity
         Family family = mapToEntity(request, village);
 
-        // Save Entity
+        // Save first to generate ID
         Family savedFamily = familyRepository.save(family);
+
+        // Generate Family Code
+        savedFamily.setFamilyCode(
+                "FAM" + String.format("%05d", savedFamily.getId())
+        );
+
+        savedFamily = familyRepository.save(savedFamily);
 
         log.info("Family created successfully. Id: {}, Code: {}",
                 savedFamily.getId(),
                 savedFamily.getFamilyCode());
 
-        // Convert Entity to Response DTO
         return mapToResponse(savedFamily);
     }
 
     @Override
     public FamilyResponse getFamilyById(Long id) {
+
         log.info("Fetching family with id {}", id);
+
         Family family = familyRepository.findById(id)
                 .orElseThrow(() -> {
+
                     log.warn("Family not found with id {}", id);
+
                     return new ResourceNotFoundException(
                             "Family not found with id : " + id);
                 });
+
         if (!family.getActive()) {
+
             throw new ResourceNotFoundException(
                     "Family not found with id : " + id);
         }
+
         return mapToResponse(family);
     }
 
     @Override
     public List<FamilyResponse> getAllFamilies() {
+
         log.info("Fetching all active families");
-        List<Family> families = familyRepository.findByActiveTrue();
-        return families.stream().map(this::mapToResponse).toList();
+
+        return familyRepository.findByActiveTrue()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     @Override
-    public FamilyResponse updateFamily(Long id, FamilyRequest request) {
-        log.info("Updating family with id {}", id);
+    public FamilyResponse updateFamily(Long id,
+                                       FamilyRequest request) {
+
+        log.info("Updating family {}", id);
+
         Family family = familyRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.warn("Family not found with id {}", id);
+
+                    log.warn("Family not found {}", id);
+
                     return new ResourceNotFoundException(
                             "Family not found with id : " + id);
                 });
-        if (familyRepository.existsByFamilyCodeAndIdNot(
-                request.getFamilyCode(), id)) {
 
-            throw new DuplicateResourceException(
-                    "Family code already exists : "
-                            + request.getFamilyCode());
-        }
         if (!family.getVillage().getId().equals(request.getVillageId())) {
 
             Village village = villageRepository.findById(request.getVillageId())
@@ -114,7 +114,7 @@ public class FamilyServiceImpl implements FamilyService {
 
             family.setVillage(village);
         }
-        family.setFamilyCode(request.getFamilyCode());
+
         family.setFamilyHeadName(request.getFamilyHeadName());
         family.setAddress(request.getAddress());
         family.setMobileNo(request.getMobileNo());
@@ -131,12 +131,12 @@ public class FamilyServiceImpl implements FamilyService {
     @Override
     public void deleteFamily(Long id) {
 
-        log.info("Deleting family with id {}", id);
+        log.info("Deleting family {}", id);
 
         Family family = familyRepository.findById(id)
                 .orElseThrow(() -> {
 
-                    log.warn("Family not found with id {}", id);
+                    log.warn("Family not found {}", id);
 
                     return new ResourceNotFoundException(
                             "Family not found with id : " + id);
@@ -148,24 +148,23 @@ public class FamilyServiceImpl implements FamilyService {
 
         log.info("Family soft deleted successfully. Id: {}", id);
     }
+
     @Override
     public List<FamilyResponse> getFamiliesByVillage(Long villageId) {
 
         log.info("Fetching families for village {}", villageId);
 
-        List<Family> families =
-                familyRepository.findByVillageId(villageId);
-
-        return families.stream()
+        return familyRepository.findByVillageId(villageId)
+                .stream()
                 .filter(Family::getActive)
                 .map(this::mapToResponse)
                 .toList();
     }
 
-    private Family mapToEntity(FamilyRequest request, Village village) {
+    private Family mapToEntity(FamilyRequest request,
+                               Village village) {
 
         return Family.builder()
-                .familyCode(request.getFamilyCode())
                 .familyHeadName(request.getFamilyHeadName())
                 .address(request.getAddress())
                 .mobileNo(request.getMobileNo())
@@ -189,16 +188,12 @@ public class FamilyServiceImpl implements FamilyService {
                 .address(family.getAddress())
                 .mobileNo(family.getMobileNo())
                 .rationCardNo(family.getRationCardNo())
-
                 .villageId(village.getId())
                 .villageName(village.getVillageName())
-
                 .districtId(district.getId())
                 .districtName(district.getDistrictName())
-
                 .stateId(state.getId())
                 .stateName(state.getStateName())
-
                 .active(family.getActive())
                 .build();
     }

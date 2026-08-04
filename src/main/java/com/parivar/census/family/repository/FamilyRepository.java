@@ -4,6 +4,7 @@ import com.parivar.census.family.entity.Family;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FamilyRepository extends JpaRepository<Family, Long> {
 
@@ -12,4 +13,5 @@ public interface FamilyRepository extends JpaRepository<Family, Long> {
     List<Family> findByActiveTrue();
     List<Family> findByVillageId(Long villageId);
 
+    Optional<Family> findByFamilyCode(String familyCode);
 }

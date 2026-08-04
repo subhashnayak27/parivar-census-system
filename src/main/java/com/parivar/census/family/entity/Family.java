@@ -36,4 +36,5 @@ public class Family extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "village_id", nullable = false)
     private Village village;
+
 }
