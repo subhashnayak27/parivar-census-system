@@ -1,15 +1,16 @@
 package com.parivar.census.district.controller;
 
 import com.parivar.census.common.ApiResponse;
+import com.parivar.census.common.dto.PageResponse;
 import com.parivar.census.district.dto.request.DistrictRequest;
 import com.parivar.census.district.dto.response.DistrictResponse;
 import com.parivar.census.district.service.DistrictService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.slf4j.Logger;
-
+import com.parivar.census.common.dto.PaginationRequest;
 import java.util.List;
 
 @RestController
@@ -21,6 +22,7 @@ public class DistrictController {
     private final DistrictService districtService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     public ApiResponse<DistrictResponse> createDistrict(@Valid @RequestBody DistrictRequest request) {
 
         DistrictResponse response = districtService.createDistrict(request);
@@ -32,6 +34,7 @@ public class DistrictController {
                 .build();
     }
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
     public ApiResponse<DistrictResponse> getDistrictById(
             @PathVariable Long id) {
 
@@ -45,21 +48,21 @@ public class DistrictController {
                 .data(response)
                 .build();
     }
+
     @GetMapping
-    public ApiResponse<List<DistrictResponse>> getAllDistricts() {
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
+    public ApiResponse<PageResponse<DistrictResponse>> getAllDistricts(
+            PaginationRequest request) {
 
-        log.info("Received request to fetch all districts");
+        log.info("Fetching districts");
 
-        List<DistrictResponse> response =
-                districtService.getAllDistricts();
-
-        return ApiResponse.<List<DistrictResponse>>builder()
-                .success(true)
-                .message("Districts fetched successfully")
-                .data(response)
-                .build();
+        return ApiResponse.success(
+                "Districts fetched successfully",
+                districtService.getAllDistricts(request));
     }
+
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     public ApiResponse<DistrictResponse> updateDistrict(
             @PathVariable Long id,
             @Valid @RequestBody DistrictRequest request) {
@@ -76,6 +79,7 @@ public class DistrictController {
                 .build();
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
     public ApiResponse<Void> deleteDistrict(@PathVariable Long id) {
 
         districtService.deleteDistrict(id);
@@ -86,6 +90,7 @@ public class DistrictController {
                 .build();
     }
     @GetMapping("/state/{stateId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
     public ApiResponse<List<DistrictResponse>> getDistrictsByState(
             @PathVariable Long stateId) {
 

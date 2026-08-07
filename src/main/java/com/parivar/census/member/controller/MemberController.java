@@ -1,5 +1,7 @@
 package com.parivar.census.member.controller;
 
+import com.parivar.census.common.dto.PageResponse;
+import com.parivar.census.common.dto.PaginationRequest;
 import com.parivar.census.common.ApiResponse;
 import com.parivar.census.member.dto.request.MemberRequest;
 import com.parivar.census.member.dto.response.MemberResponse;
@@ -8,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,12 +23,10 @@ public class MemberController {
 
     private final MemberService memberService;
     @PostMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY')")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<MemberResponse> createMember(
             @Valid @RequestBody MemberRequest request) {
-
-        log.info("Received request to create member with code: {}",
-                request.getMemberCode());
 
         MemberResponse response = memberService.createMember(request);
 
@@ -37,6 +38,7 @@ public class MemberController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
     public ApiResponse<MemberResponse> getMemberById(@PathVariable Long id) {
 
         log.info("Received request to fetch member with id: {}", id);
@@ -50,14 +52,17 @@ public class MemberController {
                 .build();
     }
     @GetMapping
-    public ApiResponse<List<MemberResponse>> getAllMembers() {
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
+    public ApiResponse<PageResponse<MemberResponse>> getAllMembers(
+            PaginationRequest request) {
         log.info("Received request to fetch members");
-        List<MemberResponse> response = memberService.getAllMembers();
-        return ApiResponse.<List<MemberResponse>>builder().success(true).message("Members fetch successfully")
-                .data(response).build();
+        return ApiResponse.success(
+                "Members fetched successfully",
+                memberService.getAllMembers(request));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY')")
     public ApiResponse<MemberResponse> updateMember(
             @PathVariable Long id,
             @Valid @RequestBody MemberRequest request) {
@@ -74,6 +79,7 @@ public class MemberController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     public ApiResponse<Void> deleteMember(@PathVariable Long id) {
 
         log.info("Received request to delete member with id {}", id);

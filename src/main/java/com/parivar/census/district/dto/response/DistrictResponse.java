@@ -12,8 +12,6 @@ public class DistrictResponse {
     private String districtCode;
 
     private String districtName;
-    
-    private String villageCode;
 
     private Long stateId;
 

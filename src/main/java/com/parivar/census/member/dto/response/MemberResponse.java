@@ -41,10 +41,21 @@ public class MemberResponse {
     private String education;
 
     private Long familyId;
-
     private String familyCode;
-
     private String familyHeadName;
+    private String gotra;
+
+    private String pata;
+
+    private String kuldevi;
+    private Long villageId;
+    private String villageName;
+
+    private Long districtId;
+    private String districtName;
+
+    private Long stateId;
+    private String stateName;
 
     private Boolean active;
 }

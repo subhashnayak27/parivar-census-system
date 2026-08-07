@@ -13,10 +13,10 @@ import lombok.*;
 @Builder
 public class FamilyRequest {
 
-    @NotBlank(message = "Family Code is required")
+  /*  @NotBlank(message = "Family Code is required")
     @Size(max = 20, message = "Family Code cannot exceed 20 characters")
     private String familyCode;
-
+*/
     @NotBlank(message = "Family Head Name is required")
     @Size(max = 150, message = "Family Head Name cannot exceed 150 characters")
     private String familyHeadName;

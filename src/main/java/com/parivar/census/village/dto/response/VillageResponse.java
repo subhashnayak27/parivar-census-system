@@ -19,5 +19,9 @@ public class VillageResponse {
 
     private String districtName;
 
+    private Long stateId;
+
+    private String stateName;
+
     private Boolean active;
 }

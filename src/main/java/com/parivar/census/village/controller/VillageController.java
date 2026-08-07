@@ -1,6 +1,7 @@
 package com.parivar.census.village.controller;
 
 import com.parivar.census.common.ApiResponse;
+import com.parivar.census.common.dto.PaginationRequest;
 import com.parivar.census.village.dto.request.VillageRequest;
 import com.parivar.census.village.dto.response.VillageResponse;
 import com.parivar.census.village.service.VillageService;
@@ -8,8 +9,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
+import com.parivar.census.common.dto.PageResponse;
 import java.util.List;
 
 @Slf4j
@@ -21,6 +23,7 @@ public class VillageController {
     private final VillageService villageService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<VillageResponse> createVillage(
             @Valid @RequestBody VillageRequest request) {
@@ -36,22 +39,16 @@ public class VillageController {
                 .data(response)
                 .build();
     }
+
     @GetMapping
-    public ApiResponse<List<VillageResponse>> getAllVillages() {
-
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
+    public ApiResponse<PageResponse<VillageResponse>> getAllVillages(PaginationRequest request) {
         log.info("Received request to fetch all villages");
-
-        List<VillageResponse> response =
-                villageService.getAllVillages();
-
-        return ApiResponse.<List<VillageResponse>>builder()
-                .success(true)
-                .message("Villages fetched successfully")
-                .data(response)
-                .build();
+        return ApiResponse.success("Villages fetched successfully",villageService.getAllVillages(request));
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
     public ApiResponse<VillageResponse> getVillageById(
             @PathVariable Long id) {
 
@@ -67,6 +64,7 @@ public class VillageController {
                 .build();
     }
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     public ApiResponse<VillageResponse> updateVillage(
             @PathVariable Long id,
             @Valid @RequestBody VillageRequest request) {
@@ -82,6 +80,7 @@ public class VillageController {
                 .build();
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public ApiResponse<Void> deleteVillage(@PathVariable Long id) {
 
         log.info("Received request to delete village {}", id);
@@ -94,6 +93,7 @@ public class VillageController {
                 .build();
     }
     @GetMapping("/district/{districtId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
     public ApiResponse<List<VillageResponse>> getVillagesByDistrict(
             @PathVariable Long districtId) {
 

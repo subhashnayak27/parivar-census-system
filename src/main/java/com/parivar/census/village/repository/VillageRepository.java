@@ -1,6 +1,8 @@
 package com.parivar.census.village.repository;
 
 import com.parivar.census.village.entity.village.Village;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -13,7 +15,7 @@ public interface VillageRepository extends JpaRepository<Village, Long> {
     Optional<Village> findByVillageCode(String villageCode);
 
     List<Village> findByDistrictId(Long districtId);
-    List<Village> findByActiveTrue();
+    Page<Village> findByActiveTrue(Pageable pageable);
     List<Village> findByDistrictIdAndActiveTrue(Long districtId);
     boolean existsByVillageCodeAndIdNot(String villageCode, Long id);
     boolean existsByVillageNameAndDistrictIdAndIdNot(

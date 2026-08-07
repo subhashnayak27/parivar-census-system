@@ -20,7 +20,8 @@ import java.time.LocalDate;
 public class Member extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "member_seq")
+    @SequenceGenerator(name = "member_seq", sequenceName = "member_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false, unique = true, length = 20)
@@ -64,6 +65,15 @@ public class Member extends BaseEntity {
 
     @Column(length = 100)
     private String education;
+
+    @Column(name = "gotra", length = 100)
+    private String gotra;
+
+    @Column(name = "pata", length = 100)
+    private String pata;
+
+    @Column(name = "kuldevi", length = 150)
+    private String kuldevi;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "family_id", nullable = false)

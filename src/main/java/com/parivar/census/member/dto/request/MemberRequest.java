@@ -18,10 +18,6 @@ import java.time.LocalDate;
 @Builder
 public class MemberRequest {
 
-    @NotBlank(message = "Member Code is required")
-    @Size(max = 20, message = "Member Code cannot exceed 20 characters")
-    private String memberCode;
-
     @NotBlank(message = "First Name is required")
     @Size(max = 100, message = "First Name cannot exceed 100 characters")
     private String firstName;
@@ -53,8 +49,8 @@ public class MemberRequest {
     private String mobileNo;
 
     @Pattern(
-            regexp = "^[0-9]{12}$",
-            message = "Aadhaar number must be 12 digits"
+            regexp = "^$|^[0-9]{12}$",
+            message = "Aadhaar number must be exactly 12 digits"
     )
     private String aadhaarNo;
 
@@ -63,6 +59,14 @@ public class MemberRequest {
 
     @Size(max = 100, message = "Education cannot exceed 100 characters")
     private String education;
+    @Size(max = 100, message = "Gotra cannot exceed 100 characters")
+    private String gotra;
+
+    @Size(max = 100, message = "Pata cannot exceed 100 characters")
+    private String pata;
+
+    @Size(max = 150, message = "Kuldevi cannot exceed 150 characters")
+    private String kuldevi;
 
     @NotNull(message = "Family Id is required")
     private Long familyId;
