@@ -1,5 +1,9 @@
 package com.parivar.census.member.service.impl;
 
+import com.parivar.census.common.dto.PageResponse;
+import com.parivar.census.common.dto.PaginationRequest;
+import com.parivar.census.common.util.PageResponseUtil;
+import com.parivar.census.common.util.PaginationUtil;
 import com.parivar.census.district.entity.district.District;
 import com.parivar.census.exception.DuplicateResourceException;
 import com.parivar.census.exception.ResourceNotFoundException;
@@ -14,6 +18,8 @@ import com.parivar.census.state.entity.State.State;
 import com.parivar.census.village.entity.village.Village;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -145,13 +151,22 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public List<MemberResponse> getAllMembers() {
+    public PageResponse<MemberResponse> getAllMembers( PaginationRequest request) {
+        log.info("Fetching Members. Page: {}, Size: {}", request.getPage(), request.getSize());
 
-        return memberRepository.findAll()
-                .stream()
-                .filter(Member::getActive)
-                .map(this::mapToResponse)
-                .toList();
+        Pageable pageable =
+                PaginationUtil.getPageable(request);
+
+        Page<Member> memberPage =
+                memberRepository.findByActiveTrue(pageable);
+        List<MemberResponse> response =
+                memberPage.getContent()
+                        .stream()
+                        .map(this::mapToResponse)
+                        .toList();
+
+
+        return PageResponseUtil.of(memberPage, response);
     }
 
     @Override

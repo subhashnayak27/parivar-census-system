@@ -1,5 +1,7 @@
 package com.parivar.census.district.service;
 
+import com.parivar.census.common.dto.PageResponse;
+import com.parivar.census.common.dto.PaginationRequest;
 import com.parivar.census.district.dto.request.DistrictRequest;
 import com.parivar.census.district.dto.response.DistrictResponse;
 
@@ -9,7 +11,7 @@ public interface DistrictService {
 
     DistrictResponse createDistrict(DistrictRequest request);
     DistrictResponse getDistrictById(Long id);
-    List<DistrictResponse> getAllDistricts();
+    PageResponse<DistrictResponse> getAllDistricts( PaginationRequest request);
     DistrictResponse updateDistrict(Long id, DistrictRequest request);
     void deleteDistrict(Long id);
     List<DistrictResponse> getDistrictsByState(Long stateId);

@@ -1,5 +1,9 @@
 package com.parivar.census.district.service.impl;
 
+import com.parivar.census.common.dto.PageResponse;
+import com.parivar.census.common.dto.PaginationRequest;
+import com.parivar.census.common.util.PageResponseUtil;
+import com.parivar.census.common.util.PaginationUtil;
 import com.parivar.census.district.dto.request.DistrictRequest;
 import com.parivar.census.district.dto.response.DistrictResponse;
 import com.parivar.census.district.entity.district.District;
@@ -12,6 +16,8 @@ import com.parivar.census.state.repository.StateRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,17 +52,27 @@ public class DistrictServiceImpl implements DistrictService {
         return mapToResponse(district);
     }
 
+
     @Override
-    public List<DistrictResponse> getAllDistricts() {
+    public PageResponse<DistrictResponse> getAllDistricts(
+            PaginationRequest request) {
 
-        log.info("Fetching all active districts");
+        log.info("Fetching districts. Page {}, Size {}",
+                request.getPage(),
+                request.getSize());
 
-        List<District> districts =
-                districtRepository.findByActiveTrue();
+        Pageable pageable = PaginationUtil.getPageable(request);
 
-        return districts.stream()
-                .map(this::mapToResponse)
-                .toList();
+        Page<District> districtPage =
+                districtRepository.findByActiveTrue(pageable);
+
+        List<DistrictResponse> response =
+                districtPage.getContent()
+                        .stream()
+                        .map(this::mapToResponse)
+                        .toList();
+
+        return PageResponseUtil.of(districtPage, response);
     }
 
     @Override

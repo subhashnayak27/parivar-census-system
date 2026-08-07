@@ -1,6 +1,8 @@
 package com.parivar.census.state.controller;
 
 import com.parivar.census.common.ApiResponse;
+import com.parivar.census.common.dto.PageResponse;
+import com.parivar.census.common.dto.PaginationRequest;
 import com.parivar.census.state.dto.request.StateRequest;
 import com.parivar.census.state.dto.response.StateResponse;
 import com.parivar.census.state.service.StateService;
@@ -8,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +24,7 @@ public class StateController {
     private final StateService stateService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<StateResponse> createState(
             @Valid @RequestBody StateRequest request) {
@@ -36,22 +40,21 @@ public class StateController {
                 .data(response)
                 .build();
     }
+
+
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
     @GetMapping
-    public ApiResponse<List<StateResponse>> getAllStates() {
+    public ApiResponse<PageResponse<StateResponse>> getAllStates(
+            PaginationRequest request) {
 
-        log.info("Received request to fetch all states");
-
-        List<StateResponse> response = stateService.getAllStates();
-
-        return ApiResponse.<List<StateResponse>>builder()
-                .success(true)
-                .message("States fetched successfully")
-                .data(response)
-                .build();
+        return ApiResponse.success(
+                "States fetched successfully",
+                stateService.getAllStates(request));
     }
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
     public ApiResponse<StateResponse> getStateById(
-            @PathVariable Long id) {
+            @PathVariable Long id)  {
 
         log.info("Received request to fetch state {}", id);
 
@@ -64,6 +67,7 @@ public class StateController {
                 .build();
     }
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     public ApiResponse<StateResponse> updateState(
             @PathVariable Long id,
             @Valid @RequestBody StateRequest request) {
@@ -79,7 +83,9 @@ public class StateController {
                 .data(response)
                 .build();
     }
+
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
     public ApiResponse<Void> deleteState(@PathVariable Long id) {
 
         stateService.deleteState(id);

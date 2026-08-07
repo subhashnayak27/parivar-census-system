@@ -11,6 +11,12 @@ import com.parivar.census.village.dto.response.VillageResponse;
 import com.parivar.census.village.service.VillageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.parivar.census.common.dto.PageResponse;
+import com.parivar.census.common.dto.PaginationRequest;
+import com.parivar.census.common.util.PageResponseUtil;
+import com.parivar.census.common.util.PaginationUtil;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import org.springframework.stereotype.Service;
 
@@ -82,16 +88,26 @@ public class VillageServiceImpl implements VillageService {
     }
 
     @Override
-    public List<VillageResponse> getAllVillages() {
+    public PageResponse<VillageResponse> getAllVillages(
+            PaginationRequest request) {
 
-        log.info("Fetching all active villages");
+        log.info("Fetching villages. Page: {}, Size: {}",
+                request.getPage(),
+                request.getSize());
 
-        List<Village> villages =
-                villageRepository.findByActiveTrue();
+        Pageable pageable =
+                PaginationUtil.getPageable(request);
 
-        return villages.stream()
-                .map(this::mapToResponse)
-                .toList();
+        Page<Village> villagePage =
+                villageRepository.findByActiveTrue(pageable);
+
+        List<VillageResponse> response =
+                villagePage.getContent()
+                        .stream()
+                        .map(this::mapToResponse)
+                        .toList();
+
+        return PageResponseUtil.of(villagePage, response);
     }
 
     @Override

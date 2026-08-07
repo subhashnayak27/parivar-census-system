@@ -1,6 +1,8 @@
 package com.parivar.census.state.service.impl;
 
+import com.parivar.census.common.dto.PaginationRequest;
 import com.parivar.census.common.service.CodeGeneratorService;
+import com.parivar.census.common.util.PaginationUtil;
 import com.parivar.census.exception.ResourceNotFoundException;
 import com.parivar.census.state.dto.request.StateRequest;
 import com.parivar.census.state.dto.response.StateResponse;
@@ -12,7 +14,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import java.util.List;
-
+import com.parivar.census.common.dto.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import com.parivar.census.common.util.PageResponseUtil;
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -71,12 +76,25 @@ public class StateServiceImpl implements StateService {
     }
 
     @Override
-    public List<StateResponse> getAllStates() {
-        log.info("Fetching all active states");
-        List<State> states = repository.findByActiveTrue();
-        return states.stream()
-                .map(this::mapToResponse)
-                .toList();
+    public PageResponse<StateResponse> getAllStates(PaginationRequest request) {
+
+        log.info("Fetching states. Page: {}, Size: {}",
+                request.getPage(),
+                request.getSize());
+
+        Pageable pageable =
+                PaginationUtil.getPageable(request);
+
+        Page<State> statePage =
+                repository.findByActiveTrue(pageable);
+
+        List<StateResponse> response =
+                statePage.getContent()
+                        .stream()
+                        .map(this::mapToResponse)
+                        .toList();
+
+        return PageResponseUtil.of(statePage, response);
     }
 
     @Override
