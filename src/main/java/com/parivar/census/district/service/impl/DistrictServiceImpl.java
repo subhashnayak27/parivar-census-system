@@ -184,10 +184,12 @@ public class DistrictServiceImpl implements DistrictService {
 
         // Save
         log.info("Creating district: {}", request.getDistrictName());
-        if (districtRepository.existsByDistrictCode(request.getDistrictCode())) {
-        log.warn("District with code {} already exists", request.getDistrictCode());
+        if (districtRepository.existsByDistrictNameAndStateId(
+                request.getDistrictName(),
+                request.getStateId())) {
+
             throw new DuplicateResourceException(
-                    "District code already exists : {}" + request.getDistrictCode());
+                    "District already exists in this state.");
         }
 
         District savedDistrict = districtRepository.save(district);
@@ -201,5 +203,42 @@ public class DistrictServiceImpl implements DistrictService {
                 .stateName(state.getStateName())
                 .active(savedDistrict.getActive())
                 .build();
+    }
+    @Override
+    public PageResponse<DistrictResponse> searchDistrict(
+            String keyword,
+            PaginationRequest request) {
+
+        log.info("Searching districts with keyword {}", keyword);
+
+        Pageable pageable =
+                PaginationUtil.getPageable(request);
+
+        Page<District> districtPage;
+
+        if (keyword == null || keyword.isBlank()) {
+
+            districtPage =
+                    districtRepository.findByActiveTrue(pageable);
+
+        } else {
+
+            districtPage =
+                    districtRepository
+                            .findByActiveTrueAndDistrictNameContainingIgnoreCaseOrActiveTrueAndDistrictCodeContainingIgnoreCase(
+                                    keyword,
+                                    keyword,
+                                    pageable);
+        }
+
+        List<DistrictResponse> response =
+                districtPage.getContent()
+                        .stream()
+                        .map(this::mapToResponse)
+                        .toList();
+
+        return PageResponseUtil.of(
+                districtPage,
+                response);
     }
 }

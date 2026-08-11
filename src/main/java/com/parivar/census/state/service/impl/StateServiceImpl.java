@@ -159,4 +159,37 @@ public class StateServiceImpl implements StateService {
                 .active(state.getActive())
                 .build();
     }
+
+    @Override
+    public PageResponse<StateResponse> searchStates(
+            String keyword,
+            PaginationRequest request) {
+
+        log.info("Searching states with keyword {}", keyword);
+
+        Pageable pageable = PaginationUtil.getPageable(request);
+
+        Page<State> statePage;
+
+        if (keyword == null || keyword.isBlank()) {
+
+            statePage = repository.findByActiveTrue(pageable);
+
+        } else {
+
+            statePage =
+                    repository.findByActiveTrueAndStateNameContainingIgnoreCaseOrActiveTrueAndStateCodeContainingIgnoreCase(
+                            keyword,
+                            keyword,
+                            pageable);
+        }
+
+        List<StateResponse> response =
+                statePage.getContent()
+                        .stream()
+                        .map(this::mapToResponse)
+                        .toList();
+
+        return PageResponseUtil.of(statePage, response);
+    }
 }

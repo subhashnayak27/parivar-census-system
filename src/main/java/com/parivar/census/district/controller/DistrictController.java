@@ -5,9 +5,11 @@ import com.parivar.census.common.dto.PageResponse;
 import com.parivar.census.district.dto.request.DistrictRequest;
 import com.parivar.census.district.dto.response.DistrictResponse;
 import com.parivar.census.district.service.DistrictService;
+import com.parivar.census.state.dto.response.StateResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.parivar.census.common.dto.PaginationRequest;
@@ -52,9 +54,7 @@ public class DistrictController {
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
     public ApiResponse<PageResponse<DistrictResponse>> getAllDistricts(
-            PaginationRequest request) {
-
-        log.info("Fetching districts");
+            @ParameterObject @ModelAttribute PaginationRequest request) {
 
         return ApiResponse.success(
                 "Districts fetched successfully",
@@ -102,5 +102,15 @@ public class DistrictController {
                 .message("Districts fetched successfully")
                 .data(response)
                 .build();
+    }
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
+    @GetMapping("/search")
+    public ApiResponse<PageResponse<DistrictResponse>> searchDistrict(
+            @RequestParam String keyword,
+            @ModelAttribute @ParameterObject PaginationRequest request) {
+
+        return ApiResponse.success(
+                "District fetched successfully",
+                districtService.searchDistrict(keyword, request));
     }
 }

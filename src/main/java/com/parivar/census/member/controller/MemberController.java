@@ -12,8 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springdoc.core.annotations.ParameterObject;
 
 @RestController
 @RequestMapping("/api/members")
@@ -36,7 +35,36 @@ public class MemberController {
                 .data(response)
                 .build();
     }
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
+    public ApiResponse<PageResponse<MemberResponse>> searchMembers(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
 
+        log.info(
+                "Searching members. keyword={}, page={}, size={}, sortBy={}, direction={}",
+                keyword,
+                page,
+                size,
+                sortBy,
+                direction
+        );
+
+        PaginationRequest request = new PaginationRequest();
+
+        request.setPage(page);
+        request.setSize(size);
+        request.setSortBy(sortBy);
+        request.setDirection(direction);
+
+        return ApiResponse.success(
+                "Members fetched successfully",
+                memberService.searchMembers(keyword, request)
+        );
+    }
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
     public ApiResponse<MemberResponse> getMemberById(@PathVariable Long id) {
@@ -50,15 +78,6 @@ public class MemberController {
                 .message("Member fetched successfully")
                 .data(response)
                 .build();
-    }
-    @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
-    public ApiResponse<PageResponse<MemberResponse>> getAllMembers(
-            PaginationRequest request) {
-        log.info("Received request to fetch members");
-        return ApiResponse.success(
-                "Members fetched successfully",
-                memberService.getAllMembers(request));
     }
 
     @PutMapping("/{id}")
@@ -91,5 +110,15 @@ public class MemberController {
                 .message("Member deleted successfully")
                 .build();
     }
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
+    @GetMapping
+    public ApiResponse<PageResponse<MemberResponse>> getAllMembers(
+            @ParameterObject
+            @ModelAttribute
+            PaginationRequest request) {
 
+        return ApiResponse.success(
+                "Members fetched successfully",
+                memberService.getAllMembers(request));
+    }
 }

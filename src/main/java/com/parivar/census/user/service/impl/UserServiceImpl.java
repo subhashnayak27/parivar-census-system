@@ -19,8 +19,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.List;
+import com.parivar.census.role.enums.RoleName;
 
 @Service
 @RequiredArgsConstructor
@@ -69,6 +71,70 @@ public class UserServiceImpl implements UserService {
         log.info("User created successfully {}", saved.getId());
 
         return mapToResponse(saved);
+    }
+
+    @Override
+    public UserResponse updateUserStatus(Long id, Boolean active) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found : " + id));
+
+        user.setActive(active);
+
+        return mapToResponse(userRepository.save(user));
+    }
+
+    @Override
+    public UserResponse updateUserRole(Long id, Long roleId) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found : " + id));
+
+        Role newRole = roleRepository.findById(roleId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Role not found : " + roleId));
+
+        RoleName currentUserRole = getCurrentUserRole();
+
+        RoleName targetRole = newRole.getRoleName();
+
+        // SUPER_ADMIN can assign ADMIN, DATA_ENTRY and VIEWER
+        if (currentUserRole == RoleName.SUPER_ADMIN) {
+
+            if (targetRole == RoleName.SUPER_ADMIN) {
+                throw new IllegalArgumentException(
+                        "SUPER_ADMIN role cannot be assigned");
+            }
+
+        }
+
+        // ADMIN can assign only DATA_ENTRY and VIEWER
+        else if (currentUserRole == RoleName.ADMIN) {
+
+            if (targetRole != RoleName.DATA_ENTRY
+                    && targetRole != RoleName.VIEWER) {
+
+                throw new IllegalArgumentException(
+                        "ADMIN can assign only DATA_ENTRY or VIEWER role");
+            }
+
+        }
+
+        // Other roles cannot change roles
+        else {
+
+            throw new IllegalArgumentException(
+                    "You are not allowed to change user roles");
+        }
+
+        user.setRole(newRole);
+
+        return mapToResponse(userRepository.save(user));
     }
 
     @Override
@@ -131,7 +197,7 @@ public class UserServiceImpl implements UserService {
 
         Pageable pageable = PaginationUtil.getPageable(request);
 
-        Page<User> userPage = userRepository.findByActiveTrue(pageable);
+        Page<User> userPage = userRepository.findAll(pageable);
 
         List<UserResponse> response = userPage.getContent()
                 .stream()
@@ -152,6 +218,34 @@ public class UserServiceImpl implements UserService {
         user.setActive(false);
 
         userRepository.save(user);
+    }
+
+    private RoleName getCurrentUserRole() {
+
+        Authentication authentication =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        if (authentication == null
+                || !authentication.isAuthenticated()) {
+
+            throw new IllegalArgumentException(
+                    "User is not authenticated");
+        }
+
+        String authority = authentication
+                .getAuthorities()
+                .stream()
+                .findFirst()
+                .map(a -> a.getAuthority())
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "User role not found"));
+
+        return RoleName.valueOf(
+                authority.replace("ROLE_", "")
+        );
     }
 
     private UserResponse mapToResponse(User user) {

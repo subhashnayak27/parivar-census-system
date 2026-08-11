@@ -16,5 +16,5 @@ public interface FamilyService {
     FamilyResponse updateFamily(Long id, FamilyRequest request);
 
     void deleteFamily(Long id);
-
+    PageResponse<FamilyResponse> searchFamilies(String keyword, PaginationRequest request);
 }

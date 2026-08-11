@@ -12,4 +12,7 @@ public interface MemberService {
     PageResponse<MemberResponse> getAllMembers(PaginationRequest request);
     MemberResponse updateMember(Long id, MemberRequest request);
     void deleteMember(Long id);
+    PageResponse<MemberResponse> searchMembers(
+            String keyword,
+            PaginationRequest request);
 }

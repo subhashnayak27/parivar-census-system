@@ -18,8 +18,14 @@ public interface VillageRepository extends JpaRepository<Village, Long> {
     Page<Village> findByActiveTrue(Pageable pageable);
     List<Village> findByDistrictIdAndActiveTrue(Long districtId);
     boolean existsByVillageCodeAndIdNot(String villageCode, Long id);
+    boolean existsByVillageNameAndDistrictId(String villageName, Long districtId);
     boolean existsByVillageNameAndDistrictIdAndIdNot(
             String villageName,
             Long districtId,
             Long id);
+    Page<Village>
+    findByActiveTrueAndVillageNameContainingIgnoreCaseOrActiveTrueAndVillageCodeContainingIgnoreCase(
+            String villageName,
+            String villageCode,
+            Pageable pageable);
 }

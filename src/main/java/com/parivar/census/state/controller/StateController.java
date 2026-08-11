@@ -9,11 +9,12 @@ import com.parivar.census.state.service.StateService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/states")
@@ -45,12 +46,13 @@ public class StateController {
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
     @GetMapping
     public ApiResponse<PageResponse<StateResponse>> getAllStates(
-            PaginationRequest request) {
+            @ParameterObject @ModelAttribute PaginationRequest request) {
 
         return ApiResponse.success(
                 "States fetched successfully",
                 stateService.getAllStates(request));
     }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
     public ApiResponse<StateResponse> getStateById(
@@ -94,5 +96,15 @@ public class StateController {
                 .success(true)
                 .message("State deleted successfully")
                 .build();
+    }
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
+    @GetMapping("/search")
+    public ApiResponse<PageResponse<StateResponse>> searchStates(
+            @RequestParam String keyword,
+            @ModelAttribute @ParameterObject PaginationRequest request) {
+
+        return ApiResponse.success(
+                "States fetched successfully",
+                stateService.searchStates(keyword, request));
     }
 }

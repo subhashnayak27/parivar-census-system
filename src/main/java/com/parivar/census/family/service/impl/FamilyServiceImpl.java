@@ -45,10 +45,13 @@ public class FamilyServiceImpl implements FamilyService {
 
         Family family = mapToEntity(request, village);
 
+        // Temporary value required for first insert
+        family.setFamilyCode("TEMP");
+
         // Save first to generate ID
         Family savedFamily = familyRepository.save(family);
 
-        // Generate Family Code
+        // Generate final Family Code
         savedFamily.setFamilyCode(
                 "FAM" + String.format("%05d", savedFamily.getId())
         );
@@ -214,5 +217,42 @@ public class FamilyServiceImpl implements FamilyService {
                 .stateName(state.getStateName())
                 .active(family.getActive())
                 .build();
+    }
+    @Override
+    public PageResponse<FamilyResponse> searchFamilies(
+            String keyword,
+            PaginationRequest request) {
+
+        log.info("Searching families with keyword {}", keyword);
+
+        Pageable pageable = PaginationUtil.getPageable(request);
+
+        Page<Family> familyPage;
+
+        if (keyword == null || keyword.isBlank()) {
+
+            familyPage = familyRepository.findByActiveTrue(pageable);
+
+        } else {
+
+            familyPage =
+                    familyRepository
+                            .findByActiveTrueAndFamilyCodeContainingIgnoreCaseOrActiveTrueAndFamilyHeadNameContainingIgnoreCaseOrActiveTrueAndMobileNoContainingOrActiveTrueAndRationCardNoContaining(
+                                    keyword,
+                                    keyword,
+                                    keyword,
+                                    keyword,
+                                    pageable);
+        }
+
+        List<FamilyResponse> response =
+                familyPage.getContent()
+                        .stream()
+                        .map(this::mapToResponse)
+                        .toList();
+
+        return PageResponseUtil.of(
+                familyPage,
+                response);
     }
 }

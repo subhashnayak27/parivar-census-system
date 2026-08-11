@@ -242,4 +242,39 @@ public class MemberServiceImpl implements MemberService {
                 .active(member.getActive())
                 .build();
     }
+    @Override
+    public PageResponse<MemberResponse> searchMembers(
+            String keyword,
+            PaginationRequest request) {
+
+        log.info("Searching members with keyword: {}", keyword);
+
+        Pageable pageable =
+                PaginationUtil.getPageable(request);
+
+        Page<Member> memberPage;
+
+        if (keyword == null || keyword.isBlank()) {
+
+            memberPage =
+                    memberRepository.findByActiveTrue(pageable);
+
+        } else {
+
+            memberPage =
+                    memberRepository.searchMembers(
+                            keyword.trim(),
+                            pageable);
+        }
+
+        List<MemberResponse> response =
+                memberPage.getContent()
+                        .stream()
+                        .map(this::mapToResponse)
+                        .toList();
+
+        return PageResponseUtil.of(
+                memberPage,
+                response);
+    }
 }

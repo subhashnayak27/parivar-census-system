@@ -3,14 +3,14 @@ package com.parivar.census.user.controller;
 import com.parivar.census.common.ApiResponse;
 import com.parivar.census.common.dto.PageResponse;
 import com.parivar.census.common.dto.PaginationRequest;
+import com.parivar.census.user.dto.request.UpdateUserRoleRequest;
 import com.parivar.census.user.dto.request.UserRequest;
 import com.parivar.census.user.dto.response.UserResponse;
 import com.parivar.census.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -41,7 +41,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     public ApiResponse<UserResponse> getUserById(
             @PathVariable Long id) {
 
@@ -50,13 +50,37 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     public ApiResponse<PageResponse<UserResponse>> getAllUsers(
             PaginationRequest request) {
 
         return ApiResponse.success(
                 "Users fetched successfully",
                 userService.getAllUsers(request));
+    }
+
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
+    public ApiResponse<UserResponse> updateUserStatus(
+            @PathVariable Long id,
+            @RequestParam Boolean active) {
+
+        return ApiResponse.success(
+                "User status updated successfully",
+                userService.updateUserStatus(id, active));
+    }
+
+    @PatchMapping("/{id}/role")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+    public ApiResponse<UserResponse> updateUserRole(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateUserRoleRequest request) {
+
+        return ApiResponse.success(
+                "User role updated successfully",
+                userService.updateUserRole(
+                        id,
+                        request.getRoleId()));
     }
 
     @DeleteMapping("/{id}")

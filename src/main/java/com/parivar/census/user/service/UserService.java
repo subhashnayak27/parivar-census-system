@@ -10,5 +10,7 @@ public interface UserService {
     UserResponse updateUser(Long id, UserRequest request);
     UserResponse getUserById(Long id);
     PageResponse<UserResponse> getAllUsers(PaginationRequest request);
+    UserResponse updateUserStatus(Long id, Boolean active);
+    UserResponse updateUserRole(Long id, Long roleId);
     void deleteUser(Long id);
 }

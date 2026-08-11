@@ -12,4 +12,5 @@ public interface StateService {
     PageResponse<StateResponse> getAllStates(PaginationRequest request);
     StateResponse updateState(Long id, StateRequest request);
     void deleteState(Long id);
+    PageResponse<StateResponse> searchStates(String keyword, PaginationRequest request);
 }

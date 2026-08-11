@@ -11,4 +11,6 @@ public interface StateRepository extends JpaRepository<State, Long> {
     boolean existsByStateCodeAndIdNot(String stateCode, Long id);
     boolean existsByStateNameAndIdNot(String stateName, Long id);
     Page<State> findByActiveTrue(Pageable pageable);
+    Page<State> findByActiveTrueAndStateNameContainingIgnoreCaseOrActiveTrueAndStateCodeContainingIgnoreCase(
+            String stateName, String stateCode, Pageable pageable);
 }

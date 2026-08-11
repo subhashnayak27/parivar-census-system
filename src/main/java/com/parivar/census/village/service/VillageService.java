@@ -9,8 +9,10 @@ public interface VillageService {
 
     VillageResponse createVillage(VillageRequest request);
     VillageResponse getVillageById(Long id);
-    PageResponse<VillageResponse> getAllVillages( PaginationRequest request);
+    PageResponse<VillageResponse> getAllVillages(PaginationRequest request);
+    PageResponse<VillageResponse> searchVillages(String keyword, PaginationRequest request);
     VillageResponse updateVillage(Long id, VillageRequest request);
     void deleteVillage(Long id);
-    List<VillageResponse> getVillagesByDistrict(Long districtId);
+    List<VillageResponse> getVillagesByDistrict(
+            Long districtId);
 }

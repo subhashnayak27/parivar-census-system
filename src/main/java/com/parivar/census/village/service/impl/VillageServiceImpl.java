@@ -50,6 +50,13 @@ public class VillageServiceImpl implements VillageService {
                     return new ResourceNotFoundException(
                             "District not found with id : " + request.getDistrictId());
                 });
+        if (villageRepository.existsByVillageNameAndDistrictId(
+                request.getVillageName(),
+                request.getDistrictId())) {
+
+            throw new DuplicateResourceException(
+                    "Village already exists in this district.");
+        }
 
         // Convert Request → Entity
         Village village = mapToEntity(request, district);
@@ -216,4 +223,42 @@ public class VillageServiceImpl implements VillageService {
                 .active(village.getActive())
                 .build();
     }
+    @Override
+    public PageResponse<VillageResponse> searchVillages(
+            String keyword,
+            PaginationRequest request) {
+
+        log.info("Searching villages with keyword {}", keyword);
+
+        Pageable pageable =
+                PaginationUtil.getPageable(request);
+
+        Page<Village> villagePage;
+
+        if (keyword == null || keyword.isBlank()) {
+
+            villagePage =
+                    villageRepository.findByActiveTrue(pageable);
+
+        } else {
+
+            villagePage =
+                    villageRepository
+                            .findByActiveTrueAndVillageNameContainingIgnoreCaseOrActiveTrueAndVillageCodeContainingIgnoreCase(
+                                    keyword,
+                                    keyword,
+                                    pageable);
+        }
+
+        List<VillageResponse> response =
+                villagePage.getContent()
+                        .stream()
+                        .map(this::mapToResponse)
+                        .toList();
+
+        return PageResponseUtil.of(
+                villagePage,
+                response);
+    }
+
 }

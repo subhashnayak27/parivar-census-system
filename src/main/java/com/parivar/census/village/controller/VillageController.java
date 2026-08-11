@@ -46,6 +46,22 @@ public class VillageController {
         log.info("Received request to fetch all villages");
         return ApiResponse.success("Villages fetched successfully",villageService.getAllVillages(request));
     }
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
+    public ApiResponse<PageResponse<VillageResponse>> searchVillages(
+            @RequestParam String keyword,
+            PaginationRequest request) {
+
+        log.info(
+                "Received request to search villages with keyword {}",
+                keyword);
+
+        return ApiResponse.success(
+                "Villages fetched successfully",
+                villageService.searchVillages(
+                        keyword,
+                        request));
+    }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")

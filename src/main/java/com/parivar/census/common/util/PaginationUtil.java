@@ -5,24 +5,37 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public final class PaginationUtil {
+public class PaginationUtil {
 
     private PaginationUtil() {
     }
 
     public static Pageable getPageable(PaginationRequest request) {
 
-        Sort.Direction direction =
-                request.getDirection().equalsIgnoreCase("desc")
-                        ? Sort.Direction.DESC
-                        : Sort.Direction.ASC;
+        int page =
+                request.getPage() == null
+                        ? 0
+                        : Math.max(request.getPage(), 0);
 
-        Sort sort = Sort.by(direction, request.getSortBy());
+        int size =
+                request.getSize() == null
+                        ? 10
+                        : Math.max(request.getSize(), 1);
 
-        return PageRequest.of(
-                request.getPage(),
-                request.getSize(),
-                sort
-        );
+        String sortBy =
+                request.getSortBy() == null || request.getSortBy().isBlank()
+                        ? "id"
+                        : request.getSortBy();
+
+        String direction =
+                request.getDirection() == null || request.getDirection().isBlank()
+                        ? "asc"
+                        : request.getDirection();
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        return PageRequest.of(page, size, sort);
     }
 }

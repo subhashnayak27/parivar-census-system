@@ -14,4 +14,10 @@ public interface FamilyRepository extends JpaRepository<Family, Long> {
     Page<Family> findByActiveTrue(Pageable pageable);
     List<Family> findByVillageIdAndActiveTrue(Long villageId);
     Optional<Family> findByFamilyCode(String familyCode);
+    Page<Family> findByActiveTrueAndFamilyCodeContainingIgnoreCaseOrActiveTrueAndFamilyHeadNameContainingIgnoreCaseOrActiveTrueAndMobileNoContainingOrActiveTrueAndRationCardNoContaining(
+            String familyCode,
+            String familyHeadName,
+            String mobileNo,
+            String rationCardNo,
+            Pageable pageable);
 }

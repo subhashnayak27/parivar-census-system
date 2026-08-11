@@ -11,9 +11,16 @@ public interface DistrictService {
 
     DistrictResponse createDistrict(DistrictRequest request);
     DistrictResponse getDistrictById(Long id);
-    PageResponse<DistrictResponse> getAllDistricts( PaginationRequest request);
-    DistrictResponse updateDistrict(Long id, DistrictRequest request);
-    void deleteDistrict(Long id);
-    List<DistrictResponse> getDistrictsByState(Long stateId);
+    PageResponse<DistrictResponse> getAllDistricts(
+            PaginationRequest request);
 
+    PageResponse<DistrictResponse> searchDistrict(
+            String keyword, PaginationRequest request);
+
+    DistrictResponse updateDistrict(
+            Long id, DistrictRequest request);
+
+    void deleteDistrict(Long id);
+
+    List<DistrictResponse> getDistrictsByState(Long stateId);
 }

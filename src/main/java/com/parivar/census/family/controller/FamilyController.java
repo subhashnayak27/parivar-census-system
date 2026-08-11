@@ -21,6 +21,36 @@ import java.util.List;
 public class FamilyController {
     private final FamilyService familyService;
 
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
+    public ApiResponse<PageResponse<FamilyResponse>> searchFamilies(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        log.info(
+                "Searching families. keyword={}, page={}, size={}, sortBy={}, direction={}",
+                keyword,
+                page,
+                size,
+                sortBy,
+                direction
+        );
+
+        PaginationRequest request = new PaginationRequest();
+
+        request.setPage(page);
+        request.setSize(size);
+        request.setSortBy(sortBy);
+        request.setDirection(direction);
+
+        return ApiResponse.success(
+                "Families fetched successfully",
+                familyService.searchFamilies(keyword, request)
+        );
+    }
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
     public ApiResponse<FamilyResponse> getFamilyById(
