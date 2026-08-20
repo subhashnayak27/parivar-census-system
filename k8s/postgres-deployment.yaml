@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: parivar-census-db
+  namespace: parivar-census
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: parivar-census-db
+  template:
+    metadata:
+      labels:
+        app: parivar-census-db
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: parivar_census
+
+            - name: POSTGRES_USER
+              value: postgres
+
+            - name: POSTGRES_PASSWORD
+              value: root
+
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+
+      volumes:
+        - name: postgres-storage
+          emptyDir: {}

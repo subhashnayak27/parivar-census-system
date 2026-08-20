@@ -1,0 +1,28 @@
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: parivar-census-db
+    environment:
+      POSTGRES_DB: parivar_census
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    ports:
+      - "5432:5432"
+    volumes:
+      - parivar_census_data:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    container_name: parivar-census-backend
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/parivar_census
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+    depends_on:
+      - postgres
+
+volumes:
+  parivar_census_data:

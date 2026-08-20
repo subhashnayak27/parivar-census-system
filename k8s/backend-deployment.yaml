@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: parivar-census-backend
+  namespace: parivar-census
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: parivar-census-backend
+
+  template:
+    metadata:
+      labels:
+        app: parivar-census-backend
+
+    spec:
+      containers:
+        - name: backend
+          image: parivar-census-backend:latest
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - containerPort: 8080
+
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://parivar-census-db:5432/parivar_census
+
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: root
+
+            - name: JWT_SECRET
+              value: ThisIsMyVerySecretKeyForParivarCensusApplication2026SecureKey123456
+
+            - name: JWT_EXPIRATION
+              value: "86400000"
