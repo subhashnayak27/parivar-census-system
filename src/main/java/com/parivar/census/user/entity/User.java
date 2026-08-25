@@ -4,6 +4,8 @@ import com.parivar.census.role.entity.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -38,5 +40,15 @@ public class User {
 
     @Builder.Default
     private Boolean active = true;
+
+
+    // ================================
+    // PASSWORD RESET
+    // ================================
+
+    @Column(length = 255)
+    private String resetPasswordToken;
+
+    private LocalDateTime resetPasswordTokenExpiry;
 
 }

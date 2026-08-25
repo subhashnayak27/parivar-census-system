@@ -24,7 +24,7 @@ public class DistrictController {
     private final DistrictService districtService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY')")
     public ApiResponse<DistrictResponse> createDistrict(@Valid @RequestBody DistrictRequest request) {
 
         DistrictResponse response = districtService.createDistrict(request);
