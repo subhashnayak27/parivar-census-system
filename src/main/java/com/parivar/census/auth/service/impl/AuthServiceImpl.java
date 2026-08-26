@@ -21,13 +21,14 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-
+import com.parivar.census.email.service.EmailService;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +36,7 @@ public class AuthServiceImpl implements AuthService {
 
     private static final Logger logger =
             LoggerFactory.getLogger(AuthServiceImpl.class);
-
+    private final EmailService emailService;
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
@@ -44,6 +45,8 @@ public class AuthServiceImpl implements AuthService {
 
     private final RoleRepository roleRepository;
 
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     // ==========================================
     // LOGIN
@@ -308,11 +311,11 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
 
-        // Temporary reset link for testing.
-        // Later this will be sent using email.
+        // Frontend reset password URL
 
         String resetLink =
-                "http://localhost:5173/reset-password?token="
+                frontendUrl
+                        + "/reset-password?token="
                         + token;
 
 
@@ -322,10 +325,19 @@ public class AuthServiceImpl implements AuthService {
         );
 
 
-        logger.debug(
-                "Password reset link: {}",
+        // Send actual email
+
+        emailService.sendPasswordResetEmail(
+                user.getEmail(),
                 resetLink
         );
+
+
+        logger.info(
+                "Password reset email process completed for: {}",
+                request.getEmail()
+        );
+
     }
 
 
