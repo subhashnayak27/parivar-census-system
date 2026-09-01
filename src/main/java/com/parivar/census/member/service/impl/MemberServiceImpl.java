@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -59,12 +60,14 @@ public class MemberServiceImpl implements MemberService {
 
         Member member = mapToEntity(request, family);
 
-        // Temporary value (member_code is NOT NULL)
-        member.setMemberCode("TEMP");
+// member_code cannot be null during initial INSERT
+        member.setMemberCode(
+                "TEMP-" + UUID.randomUUID()
+        );
 
         Member savedMember = memberRepository.save(member);
 
-        // Generate Business Code
+// Generate final business code using database ID
         savedMember.setMemberCode(
                 "MEM" + String.format("%05d", savedMember.getId())
         );
