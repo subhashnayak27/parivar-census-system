@@ -65,7 +65,14 @@ public class MemberServiceImpl implements MemberService {
                 "TEMP-" + UUID.randomUUID()
         );
 
+        log.info("Saving member with temporary memberCode={}",
+                member.getMemberCode());
+
         Member savedMember = memberRepository.save(member);
+
+        log.info("Member saved. id={}, temporary memberCode={}",
+                savedMember.getId(),
+                savedMember.getMemberCode());
 
 // Generate final business code using database ID
         savedMember.setMemberCode(
