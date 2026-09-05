@@ -161,6 +161,19 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    public List<MemberResponse> getMembersByFamilyId(Long familyId) {
+        Family family = familyRepository.findById(familyId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Family not found with id : " + familyId));
+
+        return memberRepository.findByFamilyId(family.getId())
+                .stream()
+                .filter(Member::getActive)
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
     public PageResponse<MemberResponse> getAllMembers( PaginationRequest request) {
         log.info("Fetching Members. Page: {}, Size: {}", request.getPage(), request.getSize());
 

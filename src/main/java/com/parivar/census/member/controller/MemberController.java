@@ -80,6 +80,18 @@ public class MemberController {
                 .build();
     }
 
+    @GetMapping("/family/{familyId}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
+    public ApiResponse<java.util.List<MemberResponse>> getMembersByFamilyId(@PathVariable Long familyId) {
+        log.info("Received request to fetch members for family id: {}", familyId);
+
+        return ApiResponse.<java.util.List<MemberResponse>>builder()
+                .success(true)
+                .message("Members fetched successfully")
+                .data(memberService.getMembersByFamilyId(familyId))
+                .build();
+    }
+
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY')")
     public ApiResponse<MemberResponse> updateMember(

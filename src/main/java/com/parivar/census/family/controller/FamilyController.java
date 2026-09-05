@@ -6,8 +6,14 @@ import com.parivar.census.common.dto.PaginationRequest;
 import com.parivar.census.family.dto.request.FamilyRequest;
 import com.parivar.census.family.dto.response.FamilyResponse;
 import com.parivar.census.family.service.FamilyService;
+import com.parivar.census.member.service.MemberExportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +26,7 @@ import java.util.List;
 @Slf4j
 public class FamilyController {
     private final FamilyService familyService;
+    private final MemberExportService memberExportService;
 
     @GetMapping("/search")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
@@ -125,5 +132,18 @@ public class FamilyController {
                 .success(true)
                 .message("Family deleted successfully")
                 .build();
+    }
+
+    @GetMapping("/{familyId}/members/export")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','DATA_ENTRY','VIEWER')")
+    public ResponseEntity<Resource> exportFamilyMembers(@PathVariable Long familyId) {
+        ByteArrayResource resource = new ByteArrayResource(
+                memberExportService.exportMembers(familyId, null));
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=Family_" + familyId + "_Members.xlsx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 }
