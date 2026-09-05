@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -30,6 +31,8 @@ public class MemberRequest {
 
     @NotNull(message = "Date of Birth is required")
     private LocalDate dateOfBirth;
+
+    private LocalTime birthTime;
 
     @Builder.Default
     private Boolean alive = true;

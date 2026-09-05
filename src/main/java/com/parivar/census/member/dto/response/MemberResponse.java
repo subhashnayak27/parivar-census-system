@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 @Builder
@@ -23,6 +24,8 @@ public class MemberResponse {
     private Gender gender;
 
     private LocalDate dateOfBirth;
+
+    private LocalTime birthTime;
 
     private Boolean alive;
 

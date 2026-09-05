@@ -61,8 +61,9 @@ public class MemberServiceImpl implements MemberService {
         Member member = mapToEntity(request, family);
 
 // member_code cannot be null during initial INSERT
+        // Use a short temporary code that fits the 20-char limit
         member.setMemberCode(
-                "TEMP-" + UUID.randomUUID()
+                "TMP" + UUID.randomUUID().toString().replace("-", "").substring(0, 12)
         );
 
         log.info("Saving member with temporary memberCode={}",
@@ -127,6 +128,7 @@ public class MemberServiceImpl implements MemberService {
         member.setLastName(request.getLastName());
         member.setGender(request.getGender());
         member.setDateOfBirth(request.getDateOfBirth());
+        member.setBirthTime(request.getBirthTime());
         member.setAlive(request.getAlive());
         member.setDateOfDeath(request.getDateOfDeath());
         member.setRelationship(request.getRelationship());
@@ -213,6 +215,7 @@ public class MemberServiceImpl implements MemberService {
                 .lastName(request.getLastName())
                 .gender(request.getGender())
                 .dateOfBirth(request.getDateOfBirth())
+                .birthTime(request.getBirthTime())
                 .alive(request.getAlive())
                 .dateOfDeath(request.getDateOfDeath())
                 .relationship(request.getRelationship())
@@ -242,6 +245,7 @@ public class MemberServiceImpl implements MemberService {
                 .lastName(member.getLastName())
                 .gender(member.getGender())
                 .dateOfBirth(member.getDateOfBirth())
+                .birthTime(member.getBirthTime())
                 .alive(member.getAlive())
                 .dateOfDeath(member.getDateOfDeath())
                 .relationship(member.getRelationship())

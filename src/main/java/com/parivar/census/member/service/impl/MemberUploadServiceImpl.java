@@ -61,6 +61,7 @@ public class MemberUploadServiceImpl implements MemberUploadService {
                         .lastName(request.getLastName())
                         .gender(request.getGender())
                         .dateOfBirth(request.getDateOfBirth())
+                        .birthTime(request.getBirthTime())
                         .alive(request.getAlive())
                         .dateOfDeath(request.getDateOfDeath())
                         .relationship(request.getRelationship())

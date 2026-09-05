@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "member")
@@ -39,6 +40,8 @@ public class Member extends BaseEntity {
 
     @Column(nullable = false)
     private LocalDate dateOfBirth;
+
+    private LocalTime birthTime;
 
     @Column(nullable = false)
     @Builder.Default

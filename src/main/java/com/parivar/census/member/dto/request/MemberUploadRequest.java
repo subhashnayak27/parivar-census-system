@@ -6,6 +6,7 @@ import com.parivar.census.member.enums.RelationshipType;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 public class MemberUploadRequest {
@@ -19,6 +20,8 @@ public class MemberUploadRequest {
     private Gender gender;
 
     private LocalDate dateOfBirth;
+
+    private LocalTime birthTime;
 
     private Boolean alive;
 
