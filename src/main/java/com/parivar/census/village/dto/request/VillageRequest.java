@@ -13,10 +13,6 @@ import lombok.*;
 @Builder
 public class VillageRequest {
 
-    @NotBlank(message = "Village Code is required")
-    @Size(max = 10, message = "Village Code cannot exceed 10 characters")
-    private String villageCode;
-
     @NotBlank(message = "Village Name is required")
     @Size(max = 100, message = "Village Name cannot exceed 100 characters")
     private String villageName;

@@ -28,8 +28,8 @@ public class VillageController {
     public ApiResponse<VillageResponse> createVillage(
             @Valid @RequestBody VillageRequest request) {
 
-        log.info("Received request to create village with code: {}",
-                request.getVillageCode());
+        log.info("Received request to create village for district {}",
+                request.getDistrictId());
 
         VillageResponse response = villageService.createVillage(request);
 

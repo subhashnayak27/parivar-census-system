@@ -34,22 +34,15 @@ public class VillageServiceImpl implements VillageService {
     @Override
     public VillageResponse createVillage(VillageRequest request) {
 
-        log.info("Creating village with code: {}", request.getVillageCode());
+        log.info("Creating village for districtId: {}", request.getDistrictId());
 
-        // Check duplicate village code
-        if (villageRepository.existsByVillageCode(request.getVillageCode())) {
-            log.warn("Village with code {} already exists", request.getVillageCode());
-            throw new DuplicateResourceException(
-                    "Village code already exists : " + request.getVillageCode());
-        }
-
-        // Find District
         District district = districtRepository.findById(request.getDistrictId())
                 .orElseThrow(() -> {
                     log.warn("District not found with id {}", request.getDistrictId());
                     return new ResourceNotFoundException(
                             "District not found with id : " + request.getDistrictId());
                 });
+
         if (villageRepository.existsByVillageNameAndDistrictId(
                 request.getVillageName(),
                 request.getDistrictId())) {
@@ -58,17 +51,18 @@ public class VillageServiceImpl implements VillageService {
                     "Village already exists in this district.");
         }
 
-        // Convert Request → Entity
         Village village = mapToEntity(request, district);
+        village.setVillageCode("TEMP");
 
-        // Save
         Village savedVillage = villageRepository.save(village);
+
+        savedVillage.setVillageCode("VIL" + String.format("%05d", savedVillage.getId()));
+        savedVillage = villageRepository.save(savedVillage);
 
         log.info("Village created successfully. Id: {}, Code: {}",
                 savedVillage.getId(),
                 savedVillage.getVillageCode());
 
-        // Convert Entity → Response
         return mapToResponse(savedVillage);
     }
 
@@ -127,16 +121,6 @@ public class VillageServiceImpl implements VillageService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Village not found with id : " + id));
 
-        // Duplicate Village Code
-        if (villageRepository.existsByVillageCodeAndIdNot(
-                request.getVillageCode(), id)) {
-
-            throw new DuplicateResourceException(
-                    "Village code already exists : "
-                            + request.getVillageCode());
-        }
-
-        // Duplicate Village Name within District
         if (villageRepository.existsByVillageNameAndDistrictIdAndIdNot(
                 request.getVillageName(),
                 request.getDistrictId(),
@@ -146,9 +130,7 @@ public class VillageServiceImpl implements VillageService {
                     "Village already exists in this district.");
         }
 
-        // Update District if changed
         if (!village.getDistrict().getId().equals(request.getDistrictId())) {
-
             District district = districtRepository.findById(
                             request.getDistrictId())
                     .orElseThrow(() ->
@@ -157,7 +139,6 @@ public class VillageServiceImpl implements VillageService {
             village.setDistrict(district);
         }
 
-        village.setVillageCode(request.getVillageCode());
         village.setVillageName(request.getVillageName());
         village.setPostalCode(request.getPostalCode());
 
@@ -200,7 +181,7 @@ public class VillageServiceImpl implements VillageService {
 
     private Village mapToEntity(VillageRequest request, District district) {
         return Village.builder()
-                .villageCode(request.getVillageCode())
+                .villageCode("TEMP")
                 .villageName(request.getVillageName())
                 .postalCode(request.getPostalCode())
                 .district(district)
