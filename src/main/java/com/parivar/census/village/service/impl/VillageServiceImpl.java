@@ -56,7 +56,7 @@ public class VillageServiceImpl implements VillageService {
 
         Village savedVillage = villageRepository.save(village);
 
-        savedVillage.setVillageCode("VIL" + String.format("%05d", savedVillage.getId()));
+        savedVillage.setVillageCode("VIL" + String.format("%03d", savedVillage.getId()));
         savedVillage = villageRepository.save(savedVillage);
 
         log.info("Village created successfully. Id: {}, Code: {}",
